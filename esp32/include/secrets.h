@@ -1,0 +1,2 @@
+#define WIFI_SSID "LAB_WIFI"
+#define MQTT_HOST "156.17.45.150"
