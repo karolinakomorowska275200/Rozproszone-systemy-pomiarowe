@@ -122,6 +122,15 @@ Napisano program realizujący następujące funkcje:
 * **Połączenie z Wi-Fi:** Funkcja `connectWiFi()` łącząca ESP32 z lokalną siecią.
 * **Połączenie z MQTT:** Funkcja `connectMQTT()` nawiązująca sesję z brokerem.
 * **Publikowanie danych (JSON):** Użyto biblioteki `ArduinoJson` (klasa `JsonDocument`) do zbudowania ramki danych zawierającej m.in. ID urządzenia, typ czujnika ("temperature"), wartość (24.5 °C) i znacznik czasu (`millis()`). Następnie zmodyfikowane kod, aby zczytywał realną wartość temperatury rdzenia mikrokontrolera.
+```bash
+void publishMeasurement() {
+StaticJsonDocument<256> doc;
+doc["device_id"] = deviceId;
+doc["sensor"] = "temperature";
+doc["value"] = temperatureRead();
+doc["unit"] = "C";
+doc["ts_ms"] = millis()
+```
 * Dane są wysyłane co 5 sekund na dedykowany topic: `lab/<grupa>/<device_id>/temperature`.
 
 
