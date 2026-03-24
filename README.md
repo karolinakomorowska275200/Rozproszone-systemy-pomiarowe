@@ -139,3 +139,80 @@ Działanie kodu zweryfikowano za pomocą programu **MQTT Explorer**. Po podłąc
 
 ### 5. Kontrola wersji (Git)
 Kod został zsynchronizowany ze zdalnym repozytorium na GitHubie. 
+
+
+## Lab04
+
+## 1. Struktura topiców MQTT
+Wiadomości pomiarowe publikowane są w następującej strukturze:
+`lab/<group_id>/<device_id>/<sensor>`
+
+* **Zasady nazewnictwa:** topic musi być pisany wyłącznie małymi literami, bez spacji i bez polskich znaków.
+* **Przykład:** `lab/g03/esp32-ec0ead004f8c/azimuth`
+
+
+![Struktura topiców w MQTT Explorer](img\topic.png)
+
+## 2. Opis wiadomości JSON (v1)
+Payload każdej wiadomości jest płaskim obiektem JSON. Każda wiadomość reprezentuje pojedynczą próbkę pomiarową z jednego czujnika w danym momencie czasu, wzbogaconą o metadane urządzenia.
+
+## 3. Pola wymagane
+Każda wiadomość pomiarowa musi bezwzględnie zawierać poniższe pola:
+* `device_id` (string) – unikalny identyfikator urządzenia.
+* `sensor` (string) – nazwa rodzaju sensora lub typu danych.
+* `value` (number) – faktyczna wartość pomiaru.
+* `ts_ms` (integer) – czas pomiaru zapisany jako liczba milisekund od epoki Unix.
+
+## 4. Pola opcjonalne (zalecane)
+* `schema_version` (integer) – wersja kontraktu danych. -na razie brak implementacji
+* `group_id` (string) – identyfikator grupy laboratoryjnej. -na razie brak implementacji
+* `unit` (string) – jednostka fizyczna wartości. - zaimplementowano tę wartość
+* `seq` (integer) – rosnący numer sekwencyjny wiadomości. -  na razie brak implementacji
+
+## 5. Podstawowe reguły walidacji
+Ingestor odrzuca wiadomości, które nie spełniają następujących warunków:
+* `device_id` musi być niepustym napisem.
+* `sensor` musi być napisem.
+* `value` musi być poprawną liczbą (niedopuszczalny jest zapis liczby jako string).
+* `ts_ms` musi być dodatnią liczbą całkowitą.
+* `unit` (jeśli występuje) musi odpowiadać typowi sensora[cite: 212].
+* [cite_start]`seq` (jeśli występuje) musi być liczbą całkowitą nieujemną[cite: 213].
+
+## 6. Przykład wiadomości poprawnej
+```json
+{
+  "schema_version": 1,
+  "group_id": "g03",
+  "device_id": "esp32-ec0ead004f8c",
+  "sensor": "azimuth",
+  "value": 184.25,
+  "unit": "deg",
+  "ts_ms": 1742030400000,
+  "seq": 12
+}
+```
+## 7. Przykłady wiadomości błednej
+```
+{
+  "device_id": "esp32-ec0ead004f8c",
+  "sensor": "temperature",
+  "value": "24.5",
+  "unit": "C"
+}
+
+{
+  "schema_version": 1,
+  "group_id": "g03",
+  "sensor": "oxygen",
+  "value": 7.8,
+  "unit": "mg/L",
+  "ts_ms": 1742030405000,
+  "seq": 13
+}
+```
+## 8. Uwagi dotyczące środowiska testowego (Źródła danych)
+W aktualnej fazie laboratoryjnej urządzenie ESP32 wysyła mieszankę danych rzeczywistych oraz symulowanych w celu testowania obciążenia i wykresów:
+
+* **Temperatura (`temperature`)** – rzeczywisty odczyt temperatury rdzenia ESP32 (otrzymane wartości są rzędu 40-50°C). Jednostka: `C`.
+* **Azymut (`azimuth`)** – dane symulowane matematycznie (funkcja sinus). Wartości płynnie falują w zakresie od 170.0 do 190.0 ze stałym okresem wynoszącym 60 sekund. Jednostka: `deg`.
+![Wykres falującego azymutu w MQTT Explorerze](img\screen.png)
