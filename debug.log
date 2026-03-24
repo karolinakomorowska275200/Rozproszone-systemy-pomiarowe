@@ -1,0 +1,2 @@
+[0317/124419.763:ERROR:third_party\crashpad\crashpad\util\win\registration_protocol_win.cc:108] CreateFile: Nie można odnaleźć określonego pliku. (0x2)
+[0317/124420.103:ERROR:third_party\crashpad\crashpad\util\win\registration_protocol_win.cc:108] CreateFile: Nie można odnaleźć określonego pliku. (0x2)
